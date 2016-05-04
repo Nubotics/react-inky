@@ -1,0 +1,32 @@
+{
+  "name": "react-inky",
+  "version": "0.1.0",
+  "description": "Foundation Inky components as Oy React components",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nubotics/react-inky.git"
+  },
+  "keywords": [
+    "react",
+    "oy-vey",
+    "foundation",
+    "inky",
+    "email",
+    "server",
+    "render"
+  ],
+  "author": "@Nubuck",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Nubotics/react-inky/issues"
+  },
+  "homepage": "https://github.com/Nubotics/react-inky#readme",
+  "dependencies": {
+    "react": "^0.14.8",
+    "oy-vey": "^0.6.1"
+  }
+}
