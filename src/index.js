@@ -2,23 +2,25 @@
 import fs from 'fs'
 import np from 'path'
 import React, { PropTypes } from 'react'
-import { Table, TBody, TR, TD, Img, A, renderTemplate } from 'oy-vey'
+import Oy, { Table, TBody, TR, TD, Img, A } from 'oy-vey'
 
 //-> React
-const { createClass, createFactory, createElement, cloneElement, Children } = React
-const { string, number, func, bool, array, node, object, oneOf } = PropTypes
+const {createClass, createFactory, createElement, cloneElement, Children} = React
+const {string, number, func, bool, array, node, object, oneOf} = PropTypes
 
 //::-> CSS FRAMEWORK
-const getFoundation = function () {
-  const cssPath = np.join(__dirname, './foundation.css')
-  return fs.readFileSync(cssPath, 'utf8')
+const foundationCss = require('./foundation.js')
+const getFoundation = function() {
+  //const cssPath = np.resolve(np.join(__dirname, './foundation.css'))
+  //return fs.readFileSync(cssPath, 'utf8')
+  return foundationCss
 }
-const renderFoundationTemplate = function (component, options) {
-  let { headCSS, ...other } = options
+const renderFoundationTemplate = function(component, options) {
+  let {headCSS, ...other} = options
   headCSS = headCSS || ''
   let foundationCss = getFoundation()
 
-  return renderTemplate(
+  return Oy.renderTemplate(
     component,
     {
       headCSS: `
@@ -36,14 +38,14 @@ let Container = createClass({
     className: string,
     style: object,
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       className: '',
       style: {},
     }
   },
-  render(){
-    let { className, style, children, ...other } = this.props
+  render() {
+    let {className, style, children, ...other} = this.props
     let containerProps = {
       className: `container ${className}`,
       style,
@@ -69,15 +71,15 @@ let Row = createClass({
     className: string,
     style: object,
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       collapse: false,
       className: '',
       style: {},
     }
   },
-  render(){
-    let { collapse, className, style, children, ...other  } = this.props
+  render() {
+    let {collapse, className, style, children, ...other} = this.props
     let rowProps = {
       className: `row ${collapse ? 'collapse' : ''} ${className}`,
       style,
@@ -85,15 +87,31 @@ let Row = createClass({
     }
     let childCount = Children.count(children)
     let cols = []
-    Children.forEach(children, (child, i)=> {
+    Children.forEach(children, (child, i) => {
       if (childCount === 0) {
-        cols.push(cloneElement(child, {key: `col_${i}`, first: true, last: true}))
+        cols.push(cloneElement(child, {
+          key: `col_${i}`,
+          first: true,
+          last: true
+        }))
       } else if (i === 0) {
-        cols.push(cloneElement(child, {key: `col_${i}`, first: true, last: false}))
+        cols.push(cloneElement(child, {
+          key: `col_${i}`,
+          first: true,
+          last: false
+        }))
       } else if (i === childCount - 1) {
-        cols.push(cloneElement(child, {key: `col_${i}`, first: false, last: true}))
+        cols.push(cloneElement(child, {
+          key: `col_${i}`,
+          first: false,
+          last: true
+        }))
       } else {
-        cols.push(cloneElement(child, {key: `col_${i}`, first: false, last: false}))
+        cols.push(cloneElement(child, {
+          key: `col_${i}`,
+          first: false,
+          last: false
+        }))
       }
     })
 
@@ -118,7 +136,7 @@ let Col = createClass({
     className: string,
     style: object,
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       small: 12,
       large: 12,
@@ -128,8 +146,8 @@ let Col = createClass({
       style: {},
     }
   },
-  render(){
-    let { small, large, first, last, className, style, children, ...other  } = this.props
+  render() {
+    let {small, large, first, last, className, style, children, ...other} = this.props
     let positionClassName = `${first ? 'first' : ''} ${last ? 'last' : ''}`
     let colProps = {
       className: `small-${small} large-${large} columns ${positionClassName} ${className}`,
@@ -158,7 +176,7 @@ let Text = createClass({
     className: string,
     style: object,
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       align: 'left',
       smallAlign: '',
@@ -166,8 +184,8 @@ let Text = createClass({
       style: {},
     }
   },
-  render(){
-    let { align, smallAlign, children, className, style, ...other } = this.props
+  render() {
+    let {align, smallAlign, children, className, style, ...other} = this.props
     let textProps = {
       className: `text-${align} ${smallAlign.length > 0 ? `small-text-${smallAlign}` : ''} ${className}`,
       style,
@@ -191,7 +209,7 @@ let Button = createClass({
     radius: bool,
     rounded: bool,
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       to: '',
       size: '',
@@ -202,7 +220,7 @@ let Button = createClass({
       rounded: false,
     }
   },
-  renderButton(buttonProps, linkProps, children, expanded = false){
+  renderButton(buttonProps, linkProps, children, expanded = false) {
     let expander = []
     if (expanded) {
       expander = (<TD className="expander"></TD>)
@@ -226,8 +244,8 @@ let Button = createClass({
       </Table>
     )
   },
-  render(){
-    let { to, size, className, style, expanded, radius, rounded, children, ...other } = this.props
+  render() {
+    let {to, size, className, style, expanded, radius, rounded, children, ...other} = this.props
     let buttonProps = {
       className: `button ${size} ${radius ? 'radius' : ''} ${rounded ? 'rounded' : ''} ${className}`,
       style,
@@ -260,15 +278,15 @@ let Callout = createClass({
     innerClassName: string,
     style: object,
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       className: '',
       innerClassName: 'secondary',
       style: {},
     }
   },
-  render(){
-    let { className, innerClassName, style, children, ...other } = this.props
+  render() {
+    let {className, innerClassName, style, children, ...other} = this.props
     let calloutProps = {
       className: `callout ${className}`,
       style,
@@ -297,15 +315,15 @@ let CalloutContainer = createClass({
     innerClassName: string,
     style: object,
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       className: '',
       innerClassName: 'primary',
       style: {},
     }
   },
-  render(){
-    let { className, innerClassName, style, children, ...other } = this.props
+  render() {
+    let {className, innerClassName, style, children, ...other} = this.props
     let calloutProps = {
       className: `callout ${className}`,
       style,
@@ -321,7 +339,7 @@ let CalloutContainer = createClass({
           <TD {...innerProps}>
             <Row>
               <Col small={12}
-                   large={12}>
+      large={12}>
                 { children }
               </Col>
             </Row>
@@ -338,14 +356,14 @@ let Menu = createClass({
     className: string,
     style: object,
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       className: '',
       style: {},
     }
   },
-  render(){
-    let { className, style, children, ...other } = this.props
+  render() {
+    let {className, style, children, ...other} = this.props
     let menuProps = {
       className: `menu ${className}`,
       style,
@@ -372,14 +390,14 @@ let MenuItem = createClass({
     className: string,
     style: object,
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       className: '',
       style: {},
     }
   },
-  render(){
-    let { className, style, children, ...other } = this.props
+  render() {
+    let {className, style, children, ...other} = this.props
     let itemProps = {
       className: `menu-item ${className}`,
       style,
@@ -400,15 +418,15 @@ let Spacer = createClass({
     style: object,
     height: number,
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       className: '',
       style: {},
       height: 0,
     }
   },
-  render(){
-    let { className, style, height } = this.props
+  render() {
+    let {className, style, height} = this.props
     let spacerProps = {
       className: `spacer ${className}`,
       style
@@ -425,7 +443,7 @@ let Spacer = createClass({
       <Table {...spacerProps}>
         <TBody>
         <TR>
-          <TD {...blockProps}>&#xA0;</TD>
+          <TD {...blockProps}> </TD>
         </TR>
         </TBody>
       </Table>
@@ -440,7 +458,7 @@ let Wrapper = createClass({
     style: object,
     align: oneOf(['left', 'center', 'right']),
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       className: '',
       innerClassName: '',
@@ -448,8 +466,8 @@ let Wrapper = createClass({
       align: 'center'
     }
   },
-  render(){
-    let { className,innerClassName, style, align, children, ...other } = this.props
+  render() {
+    let {className, innerClassName, style, align, children, ...other} = this.props
     let wrapperProps = {
       className: `wrapper ${className}`,
       style,
@@ -476,14 +494,14 @@ let Body = createClass({
     className: string,
     style: object,
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       className: '',
       style: {},
     }
   },
-  render(){
-    let { className, style, children, ...other } = this.props
+  render() {
+    let {className, style, children, ...other} = this.props
     let bodyProps = {
       className: `body ${className}`,
       style,
@@ -492,9 +510,9 @@ let Body = createClass({
     return (
       <Table {...bodyProps}>
         <TR>
-          <TD className="center"
-              align="center"
-              vAlign="top">
+          <TD className="float-center"
+      align="center"
+      vAlign="top">
             <center>
               { children }
             </center>
@@ -512,18 +530,18 @@ let Header = createClass({
     className: string,
     style: object,
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       className: '',
       style: {},
     }
   },
-  render(){
-    let { className, style, children, ...other } = this.props
+  render() {
+    let {className, style, children, ...other} = this.props
     let headerProps = {
       className: `header ${className}`,
       style,
-      align:'center',
+      align: 'center',
       ...other,
     }
     return (
@@ -542,19 +560,22 @@ let Footer = createClass({
   propTypes: {
     className: string,
     style: object,
+    vAlign: string,
   },
-  getDefaultProps(){
+  getDefaultProps() {
     return {
       className: '',
       style: {},
+      vAlign: 'bottom',
     }
   },
-  render(){
-    let { className, style, children, ...other } = this.props
+  render() {
+    let {className, style, vAlign, children, ...other} = this.props
     let footerProps = {
       className: `footer ${className}`,
       style,
-      align:'center',
+      align: 'center',
+      vAlign,
       ...other,
     }
     return (
@@ -570,7 +591,7 @@ let Footer = createClass({
 })
 
 export default {
-  renderTemplate,
+  renderTemplate: Oy.renderTemplate,
   getFoundation,
   renderFoundationTemplate,
   Table,
@@ -590,6 +611,7 @@ export default {
   MenuItem,
   Spacer,
   Wrapper,
+  Body,
   Header,
   Footer,
 }
