@@ -26,7 +26,10 @@
   },
   "homepage": "https://github.com/Nubotics/react-inky#readme",
   "dependencies": {
-    "react": "^0.14.8",
     "oy-vey": "^0.6.1"
+  },
+  "peerDependencies": {
+    "react": "^0.14.8",
+    "react-dom": "^0.14.8"
   }
 }

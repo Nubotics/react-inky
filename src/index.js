@@ -2,9 +2,10 @@
 import fs from 'fs'
 import np from 'path'
 import React, { PropTypes } from 'react'
+import { Table, TBody, TR, TD, Img, A, renderTemplate } from 'oy-vey'
 
 //-> React
-const { createClass, createFactory, createElement, cloneElement, } = React
+const { createClass, createFactory, createElement, cloneElement, Children } = React
 const { string, number, func, bool, array, node, object, oneOf } = PropTypes
 
 //::-> CSS FRAMEWORK
@@ -12,21 +13,48 @@ const getFoundation = function () {
   const cssPath = np.join(__dirname, './foundation.css')
   return fs.readFileSync(cssPath, 'utf8')
 }
+const renderFoundationTemplate = function (component, options) {
+  let { headCSS, ...other } = options
+  headCSS = headCSS || ''
+  let foundationCss = getFoundation()
 
-//::-> COMPONENTS
-import {Table, TBody, TR, TD, Img, A, renderTemplate} from 'oy-vey'
+  return renderTemplate(
+    component,
+    {
+      headCSS: `
+              ${foundationCss}
+              ${headCSS}
+              `,
+      ...other
+    }
+  )
+}
 
 //::-> INKY COMPONENTS
 let Container = createClass({
+  propTypes: {
+    className: string,
+    style: object,
+  },
+  getDefaultProps(){
+    return {
+      className: '',
+      style: {},
+    }
+  },
   render(){
+    let { className, style, children, ...other } = this.props
+    let containerProps = {
+      className: `container ${className}`,
+      style,
+      ...other,
+    }
     return (
-      <Table className="container">
+      <Table {...containerProps}>
         <TBody>
         <TR>
           <TD>
-
-            { this.props.children }
-
+            { children }
           </TD>
         </TR>
         </TBody>
@@ -36,12 +64,44 @@ let Container = createClass({
 })
 
 let Row = createClass({
+  propTypes: {
+    collapse: bool,
+    className: string,
+    style: object,
+  },
+  getDefaultProps(){
+    return {
+      collapse: false,
+      className: '',
+      style: {},
+    }
+  },
   render(){
+    let { collapse, className, style, children, ...other  } = this.props
+    let rowProps = {
+      className: `row ${collapse ? 'collapse' : ''} ${className}`,
+      style,
+      ...other,
+    }
+    let childCount = Children.count(children)
+    let cols = []
+    Children.forEach(children, (child, i)=> {
+      if (childCount === 0) {
+        cols.push(cloneElement(child, {key: `col_${i}`, first: true, last: true}))
+      } else if (i === 0) {
+        cols.push(cloneElement(child, {key: `col_${i}`, first: true, last: false}))
+      } else if (i === childCount - 1) {
+        cols.push(cloneElement(child, {key: `col_${i}`, first: false, last: true}))
+      } else {
+        cols.push(cloneElement(child, {key: `col_${i}`, first: false, last: false}))
+      }
+    })
+
     return (
-      <Table className="row">
+      <Table {...rowProps}>
         <TBody>
         <TR>
-          { this.props.children }
+          { cols }
         </TR>
         </TBody>
       </Table>
@@ -50,13 +110,38 @@ let Row = createClass({
 })
 
 let Col = createClass({
+  propTypes: {
+    small: number,
+    large: number,
+    first: bool,
+    last: bool,
+    className: string,
+    style: object,
+  },
+  getDefaultProps(){
+    return {
+      small: 12,
+      large: 12,
+      first: true,
+      last: true,
+      className: '',
+      style: {},
+    }
+  },
   render(){
+    let { small, large, first, last, className, style, children, ...other  } = this.props
+    let positionClassName = `${first ? 'first' : ''} ${last ? 'last' : ''}`
+    let colProps = {
+      className: `small-${small} large-${large} columns ${positionClassName} ${className}`,
+      style,
+      ...other,
+    }
     return (
-      <TD className="columns first last">
+      <TD {...colProps}>
         <Table>
           <TR>
             <TD>
-              { this.props.children }
+              { children }
             </TD>
             <TD className="expander"></TD>
           </TR>
@@ -119,7 +204,7 @@ let Button = createClass({
   },
   renderButton(buttonProps, linkProps, children, expanded = false){
     let expander = []
-    if (expanded){
+    if (expanded) {
       expander = (<TD className="expander"></TD>)
     }
     return (
@@ -132,7 +217,7 @@ let Button = createClass({
                   <center>
                     <A {...linkProps}>{ children }</A>
                   </center>
-                  </TD>
+                </TD>
               </TR>
             </Table>
             { expander }
@@ -170,12 +255,34 @@ let Button = createClass({
 })
 
 let Callout = createClass({
+  propTypes: {
+    className: string,
+    innerClassName: string,
+    style: object,
+  },
+  getDefaultProps(){
+    return {
+      className: '',
+      innerClassName: 'secondary',
+      style: {},
+    }
+  },
   render(){
+    let { className, innerClassName, style, children, ...other } = this.props
+    let calloutProps = {
+      className: `callout ${className}`,
+      style,
+      ...other,
+    }
+    let innerProps = {
+      className: `callout-inner ${innerClassName}`,
+
+    }
     return (
-      <Table className="callout">
+      <Table {...calloutProps}>
         <TR>
-          <TD className="callout-inner secondary">
-            { this.props.children }
+          <TD {...innerProps}>
+            { children }
           </TD>
           <th className="expander"></th>
         </TR>
@@ -185,27 +292,39 @@ let Callout = createClass({
 })
 
 let CalloutContainer = createClass({
+  propTypes: {
+    className: string,
+    innerClassName: string,
+    style: object,
+  },
+  getDefaultProps(){
+    return {
+      className: '',
+      innerClassName: 'primary',
+      style: {},
+    }
+  },
   render(){
+    let { className, innerClassName, style, children, ...other } = this.props
+    let calloutProps = {
+      className: `callout ${className}`,
+      style,
+      ...other,
+    }
+    let innerProps = {
+      className: `callout-inner ${innerClassName}`,
+
+    }
     return (
-      <Table className="callout">
+      <Table {...calloutProps}>
         <TR>
-          <TD className="callout-inner primary">
-            <Table className="row">
-              <TBody>
-              <TR>
-                <TD className="small-12 large-12 columns first last">
-                  <Table>
-                    <TR>
-                      <TD>
-                        { this.props.children }
-                      </TD>
-                      <TD className="expander"></TD>
-                    </TR>
-                  </Table>
-                </TD>
-              </TR>
-              </TBody>
-            </Table>
+          <TD {...innerProps}>
+            <Row>
+              <Col small={12}
+                   large={12}>
+                { children }
+              </Col>
+            </Row>
           </TD>
           <TD className="expander"></TD>
         </TR>
@@ -215,14 +334,30 @@ let CalloutContainer = createClass({
 })
 
 let Menu = createClass({
+  propTypes: {
+    className: string,
+    style: object,
+  },
+  getDefaultProps(){
+    return {
+      className: '',
+      style: {},
+    }
+  },
   render(){
+    let { className, style, children, ...other } = this.props
+    let menuProps = {
+      className: `menu ${className}`,
+      style,
+      ...other,
+    }
     return (
-      <Table className="menu">
+      <Table {...menuProps}>
         <TR>
           <TD>
             <Table>
               <TR>
-                { this.props.children }
+                { children }
               </TR>
             </Table>
           </TD>
@@ -233,22 +368,64 @@ let Menu = createClass({
 })
 
 let MenuItem = createClass({
+  propTypes: {
+    className: string,
+    style: object,
+  },
+  getDefaultProps(){
+    return {
+      className: '',
+      style: {},
+    }
+  },
   render(){
+    let { className, style, children, ...other } = this.props
+    let itemProps = {
+      className: `menu-item ${className}`,
+      style,
+      ...other,
+    }
+
     return (
-      <TD className="menu-item">
-        <A href="http://zurb.com">Item</A>
+      <TD {...itemProps}>
+        { children }
       </TD>
     )
   }
 })
 
 let Spacer = createClass({
+  propTypes: {
+    className: string,
+    style: object,
+    height: number,
+  },
+  getDefaultProps(){
+    return {
+      className: '',
+      style: {},
+      height: 0,
+    }
+  },
   render(){
+    let { className, style, height } = this.props
+    let spacerProps = {
+      className: `spacer ${className}`,
+      style
+    }
+    let heightPx = `${height}px`
+    let blockProps = {
+      height: heightPx,
+      style: {
+        fontSize: heightPx,
+        lineHeight: heightPx
+      }
+    }
     return (
-      <Table className="spacer">
+      <Table {...spacerProps}>
         <TBody>
         <TR>
-          <TD height="100px" style={{fontSize:'100px',lineHeight:'100px'}}>&#xA0;</TD>
+          <TD {...blockProps}>&#xA0;</TD>
         </TR>
         </TBody>
       </Table>
@@ -257,12 +434,36 @@ let Spacer = createClass({
 })
 
 let Wrapper = createClass({
+  propTypes: {
+    className: string,
+    innerClassName: string,
+    style: object,
+    align: oneOf(['left', 'center', 'right']),
+  },
+  getDefaultProps(){
+    return {
+      className: '',
+      innerClassName: '',
+      style: {},
+      align: 'center'
+    }
+  },
   render(){
+    let { className,innerClassName, style, align, children, ...other } = this.props
+    let wrapperProps = {
+      className: `wrapper ${className}`,
+      style,
+      align,
+      ...other,
+    }
+    let innerProps = {
+      className: `wrapper-inner ${innerClassName}`
+    }
     return (
-      <Table className="wrapper" align="center">
+      <Table {...wrapperProps}>
         <TR>
-          <TD className="wrapper-inner">
-            { this.props.children }
+          <TD {...innerProps}>
+            { children }
           </TD>
         </TR>
       </Table>
@@ -271,15 +472,31 @@ let Wrapper = createClass({
 })
 
 let Body = createClass({
+  propTypes: {
+    className: string,
+    style: object,
+  },
+  getDefaultProps(){
+    return {
+      className: '',
+      style: {},
+    }
+  },
   render(){
+    let { className, style, children, ...other } = this.props
+    let bodyProps = {
+      className: `body ${className}`,
+      style,
+      ...other,
+    }
     return (
-      <Table className="body">
+      <Table {...bodyProps}>
         <TR>
           <TD className="center"
               align="center"
-              valign="top">
+              vAlign="top">
             <center>
-              { this.props.children }
+              { children }
             </center>
           </TD>
         </TR>
@@ -288,9 +505,74 @@ let Body = createClass({
   }
 })
 
+//::-> PREFABS
+
+let Header = createClass({
+  propTypes: {
+    className: string,
+    style: object,
+  },
+  getDefaultProps(){
+    return {
+      className: '',
+      style: {},
+    }
+  },
+  render(){
+    let { className, style, children, ...other } = this.props
+    let headerProps = {
+      className: `header ${className}`,
+      style,
+      align:'center',
+      ...other,
+    }
+    return (
+      <Wrapper {...headerProps}>
+        <Container>
+          <Row collapse={true}>
+            { children }
+          </Row>
+        </Container>
+      </Wrapper>
+    )
+  }
+})
+
+let Footer = createClass({
+  propTypes: {
+    className: string,
+    style: object,
+  },
+  getDefaultProps(){
+    return {
+      className: '',
+      style: {},
+    }
+  },
+  render(){
+    let { className, style, children, ...other } = this.props
+    let footerProps = {
+      className: `footer ${className}`,
+      style,
+      align:'center',
+      ...other,
+    }
+    return (
+      <Wrapper {...footerProps}>
+        <Container>
+          <Row collapse={true}>
+            { children }
+          </Row>
+        </Container>
+      </Wrapper>
+    )
+  }
+})
+
 export default {
   renderTemplate,
   getFoundation,
+  renderFoundationTemplate,
   Table,
   TBody,
   TR,
@@ -308,4 +590,6 @@ export default {
   MenuItem,
   Spacer,
   Wrapper,
+  Header,
+  Footer,
 }
