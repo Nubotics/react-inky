@@ -220,7 +220,7 @@ let Button = createClass({
       rounded: false,
     }
   },
-  renderButton(buttonProps, linkProps, children, expanded = false) {
+  renderButton(buttonProps, style, linkProps, children, expanded = false) {
     let expander = []
     if (expanded) {
       expander = (<TD className="expander"></TD>)
@@ -231,7 +231,7 @@ let Button = createClass({
           <TD>
             <Table>
               <TR>
-                <TD>
+                <TD style={style}>
                   <center>
                     <A {...linkProps}>{ children }</A>
                   </center>
@@ -248,7 +248,6 @@ let Button = createClass({
     let {to, size, className, style, expanded, radius, rounded, children, ...other} = this.props
     let buttonProps = {
       className: `button ${size} ${radius ? 'radius' : ''} ${rounded ? 'rounded' : ''} ${className}`,
-      style,
       ...other,
     }
     let linkProps = {
@@ -262,11 +261,11 @@ let Button = createClass({
       linkProps.className = 'float-center'
       buttonComponent = (
         <Row>
-          { this.renderButton(buttonProps, linkProps, children, expanded) }
+          { this.renderButton(buttonProps, style, linkProps, children, expanded) }
         </Row>
       )
     } else {
-      buttonComponent = this.renderButton(buttonProps, linkProps, children)
+      buttonComponent = this.renderButton(buttonProps, style, linkProps, children)
     }
     return buttonComponent
   }
@@ -546,7 +545,7 @@ let Header = createClass({
     }
     return (
       <Wrapper {...headerProps}>
-        <Container>
+        <Container style={style}>
           <Row collapse={true}>
             { children }
           </Row>
@@ -580,7 +579,7 @@ let Footer = createClass({
     }
     return (
       <Wrapper {...footerProps}>
-        <Container>
+        <Container style={style}>
           <Row collapse={true}>
             { children }
           </Row>
